@@ -32,29 +32,36 @@ awk -F, 'BEGIN {OFS=","}
 }' false.csv > views.csv
 
 # Problema 4
-#!/bin/bash
+echo "video_id,trending_date,title,channel_title,category_id,publish_time,tags,views,likes,dislikes,comment_count,comments_disabled,ratings_disabled,video_error_or_removed,Ranking_Views,Rlikes,Rdislikes" > rating.csv
 
-echo "video_id,trending_date,title,channel_title,category_id,publish_time,tags,views,likes,dislikes,comment_count,Rlikes,Rdislikes" > rating.csv
+while IFS="," read -r video_id trending_date title channel_title category_id publish_time tags views likes dislikes comment_count comments_disabled ratings_disabled video_error_or_removed Ranking_Views; do
 
-while IFS=',' read -r video_id trending_date title channel_title category_id publish_time tags views likes dislikes comment_count
-do
     if [[ "$video_id" == "video_id" ]]; then
         continue
     fi
 
-    likes=$likes
-    dislikes=$dislikes
-    views=$views
+    Rlikes=""
+    Rdislikes=""
 
-    if [[ "$views" =~ ^[0-9]+$ ]] && [[ "$likes" =~ ^[0-9]+$ ]] && [[ "$dislikes" =~ ^[0-9]+$ ]] && [[ $views -gt 0 ]]; then
-        rlikes=$(( (likes * 100) / views ))
-        rdislikes=$(( (dislikes * 100) / views ))
+    if [[ -n "$likes" && "$likes" =~ ^[0-9]+$ ]] && [[ -n "$dislikes" && "$dislikes" =~ ^[0-9]+$ ]] && [[ -n "$views" && "$views" =~ ^[0-9]+$ ]]; then
+        if [[ "$views" -gt 0 ]]; then
+            Rlikes=$(( (likes * 100) / views ))
+            Rdislikes=$(( (dislikes * 100) / views ))
+        fi
+
+
+        echo "$video_id,$trending_date,$title,$channel_title,$category_id,$publish_time,$tags,$views,$likes,$dislikes,$comment_count,$comments_disabled,$ratings_disabled,$video_error_or_removed,$Ranking_Views,$Rlikes,$Rdislikes" >> rating.csv
     else
-        rlikes=0
-        rdislikes=0
+
+        output_line=""
+        for field in "$video_id" "$trending_date" "$title" "$channel_title" "$category_id" "$publish_time" "$tags" "$comment_count" "$comments_disabled" "$ratings_disabled" "$video_error_or_removed" "$Ranking_Views"; do
+            if [[ -n "$field" ]]; then
+                output_line+="$field,"
+            fi
+        done
+
+        output_line=${output_line%,}
+        echo "$output_line" >> rating.csv
     fi
 
-    echo "$video_id,$trending_date,$title,$channel_title,$category_id,$publish_time,$tags,$views,$likes,$dislikes,$comment_count,$rlikes,$rdislikes" >> rating.csv
-
 done < views.csv
-
