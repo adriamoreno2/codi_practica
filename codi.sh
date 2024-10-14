@@ -3,7 +3,7 @@
 cut -d ',' -f 1-11,13-15 supervivents.csv > tall.csv
 
 # Problema 2
-awk -F ',' '{if ($14 == "False") print $0}' tall.csv > false.csv | awk -F ',' '{ if ($14 == "video_error_or_removed") print $0}' tall.csv > false.csv 
+awk -F ',' '{if ($14 == "False") print $0}' tall.csv > false.csv | awk -F ',' '{ if ($14 == "video_error_or_removed") print $0}' tall.csv > false.csv
 
 A1=$(wc -l < tall.csv)
 A2=$(wc -l < false.csv)
@@ -65,3 +65,17 @@ while IFS="," read -r video_id trending_date title channel_title category_id pub
     fi
 
 done < views.csv
+
+# Problema 5
+read -p "Que vols buscar? " frase
+if grep -q "$frase" rating.csv; then
+    if [ "$frase" != "" ]; then
+    	cut -d ',' -f 3,6,8,9,10,15,16,17 rating.csv > sortida2.csv
+	echo "title,publish_time,views,likes,dislikes,Ranking_Views,Rlikes,Rdislikes" > sortida.csv
+	grep -i "$frase" "sortida2.csv" sortida2.csv >> sortida.csv
+    else
+	cut -d ',' -f 3,6,8,9,10,15,16,17 rating.csv > sortida.csv
+    fi
+else
+    echo "No s'han trobat coincidencies"
+fi
